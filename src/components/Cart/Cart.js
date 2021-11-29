@@ -42,6 +42,7 @@ const Cart = (props) => {
     );
     setIsSubmitting(false);
     setDidSubmit(true);
+    cartContext.resetCart();
   };
 
   const cartItems = (
@@ -64,8 +65,17 @@ const Cart = (props) => {
 
   const itemAvailable = cartContext?.items.length > 0;
 
-  return (
-    <Modal onClose={props.onClose}>
+  const modalActions = (
+    <>
+      <div className={classes.actions}>
+        <button onClick={props.onClose}>Close</button>
+        {itemAvailable && <button onClick={showCheckoutForm}>Checkout</button>}
+      </div>
+    </>
+  );
+
+  const cartModalContent = (
+    <>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
@@ -74,13 +84,29 @@ const Cart = (props) => {
       {showCheckout ? (
         <Checkout onClose={closeCheckoutForm} onConfirm={submitOrderHandler} />
       ) : (
-        <div className={classes.actions}>
-          <button onClick={props.onClose}>Close</button>
-          {itemAvailable ? (
-            <button onClick={showCheckoutForm}>Checkout</button>
-          ) : null}
-        </div>
+        modalActions
       )}
+    </>
+  );
+
+  const didSubmitModalContent = (
+    <>
+      <p>Successfully sent the order!</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.onClose}>
+          Close
+        </button>
+      </div>
+    </>
+  );
+
+  const isSubmittingModalContent = <p>Submitting Data......</p>;
+
+  return (
+    <Modal onClose={props.onClose}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && isSubmittingModalContent}
+      {!isSubmitting && didSubmit && didSubmitModalContent}
     </Modal>
   );
 };

@@ -59,6 +59,13 @@ const reducer = (state, action) => {
         items: newUpdatedItems,
         totalAmount: state.totalAmount - existingItem.price,
       };
+
+    case "RESET":
+      return {
+        ...state,
+        items: [],
+        totalAmount: 0,
+      };
     default:
       return state;
   }
@@ -75,11 +82,16 @@ const CartProvider = ({ children }) => {
     dispatchCartAction({ type: "REMOVE_ITEM", payload: id });
   };
 
+  const resetCartItem = () => {
+    dispatchCartAction({ type: "RESET" });
+  };
+
   const cartContext = {
     items: cartState.items,
     totalAmount: cartState.totalAmount,
     addItem: addItemToCartHandler,
     removeItem: removeItemFromCartHandler,
+    resetCart: resetCartItem,
   };
 
   return (
