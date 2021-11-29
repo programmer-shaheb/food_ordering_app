@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { useContextValue } from "../../store/cart-context";
 import Modal from "../UI/Modal";
 import classes from "./Cart.module.css";
 import CartItem from "./CartItem";
+import Checkout from "./Checkout";
 
 const Cart = (props) => {
   const cartContext = useContextValue();
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
+
+  const showCheckoutForm = () => {
+    setShowCheckout(true);
+  };
+
+  const closeCheckoutForm = () => {
+    setShowCheckout(false);
+  };
 
   const cartItemRemoveHandler = (id) => {
     cartContext.removeItem(id);
@@ -14,6 +26,22 @@ const Cart = (props) => {
   const cartItemAddHandler = (item) => {
     console.log(item);
     cartContext.addItem(item);
+  };
+
+  const submitOrderHandler = async (userData) => {
+    setIsSubmitting(true);
+    await fetch(
+      "https://react-challenge-bb9bb-default-rtdb.firebaseio.com/orders.json",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          user: userData,
+          ordersItems: cartContext.items,
+        }),
+      }
+    );
+    setIsSubmitting(false);
+    setDidSubmit(true);
   };
 
   const cartItems = (
@@ -43,10 +71,16 @@ const Cart = (props) => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      <div className={classes.actions}>
-        <button onClick={props.onClose}>Close</button>
-        {itemAvailable ? <button>Checkout</button> : null}
-      </div>
+      {showCheckout ? (
+        <Checkout onClose={closeCheckoutForm} onConfirm={submitOrderHandler} />
+      ) : (
+        <div className={classes.actions}>
+          <button onClick={props.onClose}>Close</button>
+          {itemAvailable ? (
+            <button onClick={showCheckoutForm}>Checkout</button>
+          ) : null}
+        </div>
+      )}
     </Modal>
   );
 };
